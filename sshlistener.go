@@ -24,7 +24,10 @@ type pwdCallback func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error)
 
 func pwdCallbackFactory(ch chan<- string) pwdCallback {
 	return func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
-		entry := fmt.Sprintf("User: %s Pwd: %s EOL", c.User(), string(pass))
+		entry := fmt.Sprintf("Ip: %s User: %s Pwd: %s EOL",
+			c.RemoteAddr().String(),
+			c.User(),
+			string(pass))
 		ch <- entry
 		return nil, errReject
 	}

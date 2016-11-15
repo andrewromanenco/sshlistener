@@ -15,7 +15,7 @@ func TestPwdCallbackSendsDataToChannel(t *testing.T) {
 	testee(stubConn, []byte("password"))
 	select {
 	case entry := <-channel:
-		if entry != "User: login Pwd: password EOL" {
+		if entry != "Ip: 192.168.1.1 User: login Pwd: password EOL" {
 			t.Error("Log entry does not look like it should")
 		}
 	default:
@@ -63,9 +63,20 @@ func (stub *stubConnMeta) ServerVersion() []byte {
 }
 
 func (stub *stubConnMeta) RemoteAddr() net.Addr {
-	return nil
+
+	return &Addr{}
 }
 
 func (stub *stubConnMeta) LocalAddr() net.Addr {
 	return nil
+}
+
+type Addr struct{}
+
+func (a *Addr) Network() string {
+	return ""
+}
+
+func (a *Addr) String() string {
+	return "192.168.1.1"
 }

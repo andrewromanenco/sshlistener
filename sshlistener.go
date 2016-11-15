@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	flushEveryNItems = 100
+	concurrentHandlers = 50
 )
 
 var (
@@ -65,12 +65,14 @@ func buildSSHConfig(logChannel chan<- string, privateKeyFile string) *ssh.Server
 	return config
 }
 
-func readLoginInfo(nConn net.Conn, config *ssh.ServerConfig) {
+func readLoginInfo(nConn net.Conn, config *ssh.ServerConfig, semaphore <-chan int) {
 	defer nConn.Close()
+	defer func() { <-semaphore }()
 	ssh.NewServerConn(nConn, config)
 }
 
 func runLogServer(privateKeyFile, logFile string) {
+	semaphore := make(chan int, concurrentHandlers)
 	logChannel := make(chan string)
 	config := buildSSHConfig(logChannel, privateKeyFile)
 
@@ -82,8 +84,9 @@ func runLogServer(privateKeyFile, logFile string) {
 	go writeToFile(logChannel, logFile)
 
 	for {
+		semaphore <- 1
 		nConn, err := listener.Accept()
-		go readLoginInfo(nConn, config)
+		go readLoginInfo(nConn, config, semaphore)
 		if err != nil {
 			log.Println("failed to accept incoming connection: ", err)
 		}

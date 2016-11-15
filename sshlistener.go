@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -44,5 +45,13 @@ func writeToFile(ch <-chan string, filePath string) {
 }
 
 func main() {
-
+	var privateKeyFile string
+	var logFile string
+	flag.StringVar(&privateKeyFile, "private", "", "Path to private key (id_rsa)")
+	flag.StringVar(&logFile, "output", "", "Path to log file to write to")
+	flag.Parse()
+	if privateKeyFile == "" || logFile == "" {
+		flag.PrintDefaults()
+		return
+	}
 }

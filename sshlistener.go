@@ -74,12 +74,12 @@ func readLoginInfo(nConn net.Conn, config *ssh.ServerConfig, semaphore <-chan in
 	ssh.NewServerConn(nConn, config)
 }
 
-func runLogServer(privateKeyFile, logFile string) {
+func runLogServer(privateKeyFile, logFile string, port int) {
 	semaphore := make(chan int, concurrentHandlers)
 	logChannel := make(chan string)
 	config := buildSSHConfig(logChannel, privateKeyFile)
 
-	listener, err := net.Listen("tcp", "0.0.0.0:2022")
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		panic(err)
 	}
@@ -99,13 +99,15 @@ func runLogServer(privateKeyFile, logFile string) {
 func main() {
 	var privateKeyFile string
 	var logFile string
+	var port int
 	flag.StringVar(&privateKeyFile, "private", "", "Path to private key (id_rsa)")
 	flag.StringVar(&logFile, "output", "", "Path to log file to write to")
+	flag.IntVar(&port, "port", 0, "Listening port")
 	flag.Parse()
-	if privateKeyFile == "" || logFile == "" {
+	if privateKeyFile == "" || logFile == "" || port == 0 {
 		flag.PrintDefaults()
 		return
 	}
 
-	runLogServer(privateKeyFile, logFile)
+	runLogServer(privateKeyFile, logFile, port)
 }

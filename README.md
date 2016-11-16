@@ -1,6 +1,8 @@
 # sshlistener
 Opens a ssh server and listens for authentication data (login and password). Input is logged.
 
+This code is created to collect most popular passwords via AWS based experiment: <a href="http://romanenco.com/collect-passwords" target="_blank">collect passwords blog post</a>.
+
 ### Generate SSH key (optional)
 ```
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
